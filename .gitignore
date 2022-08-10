@@ -1,0 +1,10 @@
+# Vivado
+*.cache
+*.hw
+*.runs
+*.sim
+*.jou
+*.log
+*ip_user_files
+*str
+/assembler/testeo_entrega/
