@@ -1,0 +1,116 @@
+DATA:
+
+led  0
+sw   0
+dis  0
+btn  0
+sec  0
+msec 0
+usec 0
+lcd  0
+
+last_btn 0
+
+CODE:
+
+MOV B,0
+
+wait_start:
+    PUSH B
+    MOV A,(btn)   
+    CMP A,0
+    JNE save_btn  
+    JMP check_switch
+    save_btn:
+        MOV A,(dis)
+        SUB A,(last_btn)
+        MOV (dis),A
+        MOV B,(btn)
+        MOV (last_btn),B
+    wait_release:
+        MOV A,(btn)
+        CMP A,0
+        JNE wait_release
+    MOV A,B
+    ADD A,(dis)  
+    MOV (dis), A
+    check_switch:
+        MOV A,(sw)
+        POP B
+        CMP A,B
+        JEQ wait_start
+        MOV A,0
+        MOV (last_btn),A
+        JMP countdown
+
+countdown:
+    MOV A, 3
+    MOV (dis), A
+three:
+    MOV A, (sec)
+    CMP A, (sec)
+    JEQ three
+    MOV A, 2
+    MOV (dis), A
+two:
+    MOV A, (sec)
+    CMP A, (sec)
+    JEQ two
+    MOV A, 1
+    MOV (dis), A
+one:
+    MOV A, (sec)
+    CMP A, (sec)
+    JEQ one
+    MOV A, 0
+    MOV (dis), A
+
+game:
+    MOV A,0
+    MOV (dis),A
+    MOV B, (msec)
+    CALL std_10_btn_wait
+
+    MOV A,(dis)
+    SHL (dis),A
+    MOV A,(dis)
+    SHL (dis),A
+    MOV A,(dis)
+    SHL (dis),A
+    MOV A,(dis)
+    SHL (dis),A
+    MOV A,(dis)
+    SHL (dis),A
+    MOV A,(dis)
+    SHL (dis),A
+    MOV A,(dis)
+    SHL (dis),A
+    MOV A,(dis)
+    SHL (dis),A
+
+    MOV A, (msec)
+    SUB A, B
+    MOV (led), A
+    MOV B,(sw)
+    JMP wait_start
+    
+std_10_btn_wait:
+    PUSH B 
+    MOV A,(btn) 
+    std_io_btn_wait_press_lp:
+        MOV B,(btn) 
+        CMP A,B 
+        JEQ std_io_btn_wait_press_lp
+        MOV A,(btn)
+        MOV (dis),A
+    std_io_btn_wait_release_lp:
+        MOV A,(btn)
+        CMP A,0
+        JNE std_io_btn_wait_release_lp
+    MOV A,B
+    POP B
+RET
+
+null:
+JMP null
+

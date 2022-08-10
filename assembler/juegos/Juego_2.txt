@@ -1,0 +1,165 @@
+DATA:
+
+led 0
+sw 0
+dis 0
+btn 0
+sec 0
+msec 0
+usec 0
+lcd 0
+time 0
+sw_value 0
+dis_value 0
+i 0
+
+CODE:
+
+wait_start:
+    MOV A,(sw)
+    CMP A,0000000000000001b // Solo parte el juego si el primer switch está activo
+    JNE wait_start
+    MOV A, 0000000011111111b
+    MOV (led), A
+    MOV B, (sec)
+
+introduce_switch_value:
+    MOV A, (sec)
+    SUB (time)
+    CALL show_on_left_display
+    MOV A, (time)
+    CMP A, 10    // LIT da la cantidad de segundos que tiene J1 para mover los switches
+    JLE introduce_switch_value
+    MOV A, 0
+    MOV (time), A
+    MOV A, (sw)
+    MOV (sw_value), A
+    MOV A, 0
+    MOV (i), A
+    get_sw_value:
+        INC (i)
+        MOV A, (sw_value)
+        SHR A
+        MOV (sw_value), A
+        MOV A, (i)
+        CMP A, 8
+        JNE get_sw_value
+
+countdown:
+    MOV A, 3
+    MOV (dis), A
+    MOV A, (sec)
+three:
+    CMP A, (sec)
+    JEQ three
+    MOV A, 2
+    MOV (dis), A
+    MOV A, (sec)
+two:
+    CMP A, (sec)
+    JEQ two
+    MOV A, 1
+    MOV (dis), A
+    MOV A, (sec)
+one:
+    CMP A, (sec)
+    JEQ one
+    MOV A, 0
+    MOV (dis), A
+    MOV B, (sec)
+
+game:
+    MOV A, (sec)
+    SUB (time)
+    CALL show_on_left_display
+    MOV A, (btn)
+    CMP A,0
+    JNE sum_btn
+continue:
+    MOV A, (time)
+    CMP A, 15    // LIT da la cantidad de segundos que tiene J2 para ingresar el número
+    JLE game
+    MOV A, 0
+    MOV (time), A
+    MOV A, (dis_value)
+    MOV B, (sw_value)
+    CMP A,B
+    JEQ winner
+    JNE looser
+    winner:
+        CALL win_point
+        JMP check_score
+    looser:
+        CALL lose_point
+    check_score:
+        MOV A, 0000000000000000b
+        CMP A, (led)
+        JEQ J1_win
+        MOV A, 1111111111111111b
+        CMP A, (led)
+        JEQ J2_win
+        MOV B, (sec)
+        JMP introduce_switch_value
+    sum_btn:
+        ADD A,(dis_value)
+        MOV (dis_value),A
+    wait_release:
+        MOV A,(btn)
+        CMP A,0
+        JNE wait_release
+        JMP continue
+    
+J1_win:
+    MOV A, 1111h
+    MOV (dis), A
+    JMP wait_start
+
+J2_win:
+    MOV A, 2222h
+    MOV (dis), A
+    JMP wait_start
+
+show_on_left_display:
+    MOV A, 0
+    MOV (i), A
+    MOV A, (time)
+    PUSH A
+    shift_left_eight:
+        INC (i)
+        POP A
+        SHL A
+        PUSH A
+        MOV A, (i)
+        CMP A, 8
+        JNE shift_left_eight
+    POP A
+    PUSH B
+    MOV B, (dis_value)
+    ADD A, B
+    MOV (dis), A
+    POP B
+    RET
+        
+win_point:
+    PUSH A
+    MOV A, (led)
+    SHL A
+    INC A
+    MOV (led), A
+    MOV A,0
+    MOV (dis_value), A
+    POP A
+    RET
+
+lose_point:
+    PUSH A
+    MOV A, (led)
+    SHR A
+    MOV (led), A
+    MOV A,0
+    MOV (dis_value), A
+    POP A
+    RET
+
+null:
+    JMP null

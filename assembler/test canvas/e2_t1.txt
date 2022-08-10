@@ -1,0 +1,57 @@
+DATA:
+0 10
+CODE:
+MOV B,10 // 000A
+MOV (0),B // 000A
+MOV B,0 // 0000
+JMP 5 // 2
+MOV A,16 // 3
+5:
+MOV A,3 // 4
+CMP A,4 // 5
+JNE 9 // 6
+JMP 37 // 7
+9:
+MOV A,3 // 8
+CMP A,3 // 9
+JEQ 13 // 10
+JMP 37 // 11
+13: 
+MOV A,10 // 12
+CMP A,4 // 13
+JGT 17 // 14
+JMP 37 // 15
+17: 
+CMP A,20 // 16
+JLT 20 // 17
+JMP 37 // 18
+20:
+CMP A,8 // 19
+JGE 23 // 20
+JMP 37 // 21
+23:
+CMP A,(0) // 22
+JGE 26 // 23
+JMP 37 // 24
+26:
+CMP A,11 // 25
+JLE 29 // 26
+JMP 37 // 27
+29:
+CMP A,(0) // 28
+JLE 32 // 29
+JMP 37 // 30
+32:
+MOV A,255 // 31
+ADD A,10 // 32
+CMP A,B // 33
+JMP 40 // 34
+JMP 37 // 35
+37:
+MOV A,15 // 36
+MOV B,15 // 37
+JMP 37 // 38
+40:
+MOV A,16 // 39
+MOV B,16 // 40
+JMP 40
